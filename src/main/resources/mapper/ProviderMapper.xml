@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.ProviderMapper">
+ <select id="getList" resultType="com.entity.Provider">
+     SELECT * FROM smbms_provider
+ </select>
+    <select id="getByproCode" resultType="com.entity.Provider">
+        SELECT * FROM smbms_provider where proCode=#{proCode}
+    </select>
+    <select id="getLike" resultType="com.entity.Provider">
+        SELECT * FROM smbms_provider
+        <where>
+            <if test="proCode !=null and proCode !=''">
+                proCode like concat('%',#{proCode},'%')
+            </if>
+            <if test="proName !=null and proName !=''">
+                and proName like concat('%',#{proName},'%')
+            </if>
+        </where>
+    </select>
+<insert id="add" parameterType="com.entity.Provider">
+    insert into smbms_provider (id,proCode,proName,proDesc,proContact,proPhone,proAddress,proFax,createdBy,creationDate,modifyDate,modifyBy)
+    values (#{id},#{proCode},#{proName},#{proDesc},#{proContact},#{proPhone},#{proAddress},
+        #{proFax},#{createdBy},#{creationDate},#{modifyDate},#{modifyBy})
+</insert>
+    <update id="update">
+        update smbms_provider
+        <set>
+            <if test="proCode !=null">proCode=#{proCode},</if>
+            <if test="proName !=null">proName=#{proName},</if>
+            <if test="proDesc !=null">proDesc=#{proDesc}, </if>
+            <if test="proContact !=null">proContact=#{proContact},</if>
+            <if test="proPhone !=null">  proPhone=#{proPhone}, </if>
+            <if test="proAddress !=null">proAddress=#{proAddress}, </if>
+            <if test="proFax !=null">proFax=#{proFax},</if>
+            <if test="createdBy !=null">createdBy=#{createdBy},</if>
+            <if test="creationDate !=null">creationDate=#{creationDate},</if>
+            <if test="modifyDate !=null">modifyDate=#{modifyDate},</if>
+            <if test="modifyBy !=null">modifyBy=#{modifyBy},</if>
+        </set>
+        where id=#{id}
+    </update>
+    <delete id="delete">
+        delete from smbms_provider where id=#{id}
+    </delete>
+    <select id="getListByIDs" resultType="com.entity.Provider">
+        select * from smbms_provider
+        <where>
+            <if test="plist!=null and plist.size>0">
+                id in
+                <foreach collection="plist" item="roleList" open="(" separator="," close=")">
+                    #{roleList}
+                </foreach>
+            </if>
+        </where>
+
+    </select>
+<select id="getByid" resultType="com.entity.Provider">
+    select * from smbms_provider
+<where>
+    <if test="id !=null and id != ''">
+        id=#{id}
+    </if>
+</where>
+</select>
+    <select id="fenye" resultType="com.entity.Provider">
+        select * from smbms_provider limit #{from},#{pageSize}
+    </select>
+</mapper>

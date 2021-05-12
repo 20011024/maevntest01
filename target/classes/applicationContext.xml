@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+   <import resource="classpath:spring-mvc.xml"/>
+    <!--    扫描com包下的注解-->
+    <context:component-scan base-package="com.Service"></context:component-scan>
+
+    <!-- 引入properties文件 -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location">
+            <value> classpath:db.properties</value>
+        </property>
+    </bean>
+    <!--1 c3p0数据源的配置-->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" >
+        <property name="driverClass" value="${driver}"></property>
+        <property name="jdbcUrl" value="${url}"></property>
+        <property name="user" value="${username}"></property>
+        <property name="password" value="${password}"></property>
+    </bean>
+    <!--2 SqlSessionFactoryBean配置,提供SqlSession对象-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"></property>
+        <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+        <property name="mapperLocations" value="classpath:mapper/*Mapper.xml"></property>
+    </bean>
+    <!--3 SqlSessionTemplate负责管理SqlSession-->
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"></constructor-arg>
+    </bean>
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.mapper"></property>
+    </bean>
+
+
+
+    <!--    创建事务注解-->
+    <!--    <tx:annotation-driven transaction-manager="txManage"></tx:annotation-driven>-->
+
+
+    <!--    定义一个事务管理器-->
+    <bean id="txManage" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+    </bean>
+    <!--    tx:advice配置事务通知事务绑定器并针对不同方法定义事务规则-->
+    <tx:advice id="txAdvice" transaction-manager="txManage">
+        <tx:attributes>
+            <!--            默认情况下运行异常回滚，检测异常不会滚-->
+            <!--            rollbake-for配置检测异常问题-->
+            <tx:method name="*" rollback-for="java.lang.Exception"/>
+            <tx:method name="find*" read-only="true" propagation="SUPPORTS" timeout="3" rollback-for="java.lang.Exception"/>
+            <tx:method name="get*" read-only="true" propagation="SUPPORTS" timeout="3" rollback-for="java.lang.Exception"/>
+            <!--            配置事务传播属性-->
+            <tx:method name="add*" propagation="REQUIRED"  rollback-for="java.lang.Exception"></tx:method>
+            <tx:method name="delete*" propagation="REQUIRED"  rollback-for="java.lang.Exception"></tx:method>
+            <!--           配置事务隔离级别-->
+            <tx:method name="update*" propagation="REQUIRED"  rollback-for="java.lang.Exception"></tx:method>
+        </tx:attributes>
+    </tx:advice>
+    <!--    定义aop切面-->
+    <aop:config>
+        <!--        配置通知和切点-->
+        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.Service.*.*(..))"></aop:advisor>
+    </aop:config>
+
+
+
+</beans>

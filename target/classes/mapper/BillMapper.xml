@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mapper.BillMapper">
+
+    <resultMap id="BillList" type="com.entity.Bill">
+        <result property="id" column="id"></result>
+        <result property="billCode" column="billCode"></result>
+        <result property="productName" column="productName"></result>
+        <result property="productDesc" column="productDesc"></result>
+        <result property="productUnit" column="productUnit"></result>
+        <result property="productCount" column="productCount"></result>
+        <result property="totalPrice" column="totalPrice"></result>
+        <result property="isPayment" column="isPayment"></result>
+        <result property="providerId" column="providerId"></result>
+        <result property="createdBy" column="createdBy"></result>
+        <result property="creationDate" column="creationDate"></result>
+        <result property="modifyBy" column="modifyBy"></result>
+        <result property="modifyDate" column="modifyDate"></result>
+        <association property="provider" javaType="com.entity.Provider">
+            <result property="proName" column="proName"></result>
+            <result property="proContact" column="proContact"></result>
+            <result property="proPhone" column="proPhone"></result>
+        </association>
+    </resultMap>
+    <select id="lianbiao" resultMap="BillList">
+        SELECT t1.*,t2.proName,t2.proContact,t2.proPhone FROM smbms_bill t1
+            INNER JOIN  smbms_provider t2 ON t1.providerId = t2.id
+        <where>
+            <if test="pid !=null and pid !=''">
+                t1.providerId = #{pid}
+            </if>
+        <if test="pname !=null and pname !=''">
+            and productName like concat('%',#{pname},'%')
+        </if>
+        </where>
+    </select>
+    <select id="getList" resultMap="BillList">
+        SELECT t1.*,t2.proName,t2.proContact,t2.proPhone FROM smbms_bill t1
+        INNER JOIN  smbms_provider t2 ON t1.providerId = t2.id
+    </select>
+    <select id="getBillById" resultMap="BillList" >
+        SELECT * FROM smbms_bill
+        inner join smbms_provider on  smbms_bill.providerId = smbms_provider.id
+        where smbms_bill.id=#{billid}
+    </select>
+    <insert id="add" parameterType="com.entity.Bill">
+        insert into smbms_bill (id,billCode,productName,productDesc,productUnit,productCount,totalPrice,isPayment,createdBy,creationDate,modifyBy,modifyDate,providerId)
+        values (#{id},#{billCode},#{productName},#{productDesc},#{productUnit},#{productCount},
+                #{totalPrice},#{isPayment},#{createdBy},#{creationDate},#{modifyBy},#{modifyDate},#{providerId})
+    </insert>
+    <delete id="delete" parameterType="Integer">
+        delete from smbms_bill where id=#{id}
+    </delete>
+    <update id="update" parameterType="com.entity.Bill">
+        update smbms_bill set billCode=#{billCode},productName=#{productName},productDesc=#{productDesc},productUnit=#{productUnit},productCount=#{productCount},
+                              totalPrice=#{totalPrice},isPayment=#{isPayment},createdBy=#{createdBy},creationDate=#{creationDate},modifyBy=#{modifyBy},
+                              modifyDate=#{modifyDate},providerId=#{providerId}
+        where id=#{id}
+    </update>
+    <select id="getLike" resultMap="BillList">
+
+        SELECT * FROM smbms_bill
+        INNER JOIN smbms_provider ON smbms_bill.providerId = smbms_provider.id
+        <where>
+            <if test="productName !=null and productName !=''">
+                smbms_bill.productName LIKE concat('%',#{productName},'%')
+            </if>
+            <if test="providerId !=null and providerId !=''">
+                AND smbms_bill.providerId=${providerId}
+            </if>
+            <if test="isPayment !=null and isPayment !=''">
+                AND smbms_bill.isPayment=${isPayment}
+            </if>
+        </where>
+    </select>
+
+<select id="getBillCode" resultType="com.entity.Bill">
+    SELECT * FROM smbms_bill where billCode=#{billCode}
+</select>
+
+</mapper>

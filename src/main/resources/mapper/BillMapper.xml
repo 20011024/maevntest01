@@ -21,6 +21,7 @@
             <result property="proContact" column="proContact"></result>
             <result property="proPhone" column="proPhone"></result>
         </association>
+
     </resultMap>
     <select id="lianbiao" resultMap="BillList">
         SELECT t1.*,t2.proName,t2.proContact,t2.proPhone FROM smbms_bill t1
